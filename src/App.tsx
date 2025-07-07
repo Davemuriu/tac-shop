@@ -12,6 +12,9 @@ import { Header } from "@/components/Layout/Header";
 import { LoginForm } from "@/components/Login/LoginForm";
 import Dashboard from "./pages/Dashboard";
 import PointOfSale from "./pages/PointOfSale";
+import Inventory from "./pages/Inventory";
+import Reports from "./pages/Reports";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
