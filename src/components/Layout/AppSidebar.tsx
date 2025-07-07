@@ -36,10 +36,11 @@ const navigationItems = [
 ];
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const { user } = useAuth();
   const currentPath = location.pathname;
+  const isCollapsed = state === "collapsed";
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -53,14 +54,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${collapsed ? "w-14" : "w-64"} border-r border-border bg-card`}
-      collapsible
+      className={`${isCollapsed ? "w-14" : "w-64"} border-r border-border bg-card`}
+      collapsible="offcanvas"
     >
       <SidebarContent>
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
-            {!collapsed && (
+            {!isCollapsed && (
               <span className="font-bold text-lg">TAC SHOP</span>
             )}
           </div>
@@ -79,7 +80,7 @@ export function AppSidebar() {
                       className={getNavCls}
                     >
                       <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!isCollapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -88,7 +89,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {user && !collapsed && (
+        {user && !isCollapsed && (
           <div className="mt-auto p-4 border-t border-border">
             <div className="text-sm text-muted-foreground">
               <div className="font-medium">{user.name}</div>
