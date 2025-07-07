@@ -16,7 +16,7 @@ export default function PointOfSale() {
   const { products, cart, addToCart, removeFromCart, updateCartQuantity, completeSale } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'digital'>("cash");
   const [discount, setDiscount] = useState(0);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
