@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Product, Sale, SaleItem, CartItem, DashboardStats } from '@/types';
 import { useAuth } from './AuthContext';
@@ -8,11 +7,16 @@ interface StoreContextType {
   sales: Sale[];
   cart: CartItem[];
   dashboardStats: DashboardStats;
+  heldCarts: { id: string; items: CartItem[]; timestamp: string }[];
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
   completeSale: (paymentMethod: 'cash' | 'card' | 'digital' | 'mpesa', discount?: number) => Sale;
   clearCart: () => void;
+  holdCart: () => void;
+  resumeCart: (heldCartId: string) => void;
+  addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateProduct: (id: string, updates: Partial<Product>) => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -24,6 +28,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [products] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [heldCarts, setHeldCarts] = useState<{ id: string; items: CartItem[]; timestamp: string }[]>([]);
 
   // Empty dashboard stats
   const [dashboardStats] = useState<DashboardStats>({
@@ -68,6 +73,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           : item
       )
     );
+  };
+
+  const holdCart = () => {
+    if (cart.length === 0) return;
+    
+    const heldCart = {
+      id: `held-${Date.now()}`,
+      items: [...cart],
+      timestamp: new Date().toISOString()
+    };
+    
+    setHeldCarts(prev => [...prev, heldCart]);
+    setCart([]);
+  };
+
+  const resumeCart = (heldCartId: string) => {
+    const heldCart = heldCarts.find(hc => hc.id === heldCartId);
+    if (heldCart) {
+      setCart(heldCart.items);
+      setHeldCarts(prev => prev.filter(hc => hc.id !== heldCartId));
+    }
+  };
+
+  const addProduct = (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
+    // Mock implementation - in real app this would call API
+    console.log('Adding product:', product);
+  };
+
+  const updateProduct = (id: string, updates: Partial<Product>) => {
+    // Mock implementation - in real app this would call API
+    console.log('Updating product:', id, updates);
   };
 
   const completeSale = (paymentMethod: 'cash' | 'card' | 'digital' | 'mpesa', discount: number = 0): Sale => {
@@ -120,6 +156,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       updateCartQuantity,
       completeSale,
       clearCart,
+      holdCart,
+      resumeCart,
+      heldCarts,
+      addProduct,
+      updateProduct,
     }}>
       {children}
     </StoreContext.Provider>

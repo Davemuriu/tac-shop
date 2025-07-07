@@ -41,10 +41,11 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/pos" element={<PointOfSale />} />
-              <Route path="/inventory" element={<div className="p-6"><h1 className="text-2xl font-bold">Inventory Management</h1><p className="text-muted-foreground">Coming soon...</p></div>} />
+              <Route path="/inventory" element={<Inventory />} />
               <Route path="/sales" element={<div className="p-6"><h1 className="text-2xl font-bold">Sales History</h1><p className="text-muted-foreground">Coming soon...</p></div>} />
-              <Route path="/reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Reports</h1><p className="text-muted-foreground">Coming soon...</p></div>} />
+              <Route path="/reports" element={<Reports />} />
               <Route path="/customers" element={<div className="p-6"><h1 className="text-2xl font-bold">Customer Management</h1><p className="text-muted-foreground">Coming soon...</p></div>} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="/settings" element={<div className="p-6"><h1 className="text-2xl font-bold">Settings</h1><p className="text-muted-foreground">Coming soon...</p></div>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

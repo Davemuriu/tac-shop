@@ -8,6 +8,7 @@ interface AuthContextType {
   logout: () => void;
   switchUser: (userId: string, pin: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<boolean>;
+  verifyPin: (pin: string) => boolean;
   isLoading: boolean;
 }
 
@@ -36,7 +37,7 @@ const mockUsers: User[] = [
     email: 'manager@tacshop.com',
     name: 'Manager User',
     role: 'manager',
-    permissions: ['inventory', 'reports', 'pos'],
+    permissions: ['inventory', 'reports', 'pos', 'discounts'],
     pin: '5678'
   },
   {
@@ -103,8 +104,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     const foundUser = mockUsers.find(u => u.email === email);
+    if (foundUser) {
+      // In real app, this would send reset email
+      console.log(`Password reset sent to ${email}`);
+      setIsLoading(false);
+      return true;
+    }
+    
     setIsLoading(false);
-    return !!foundUser;
+    return false;
+  };
+
+  const verifyPin = (pin: string): boolean => {
+    return user?.pin === pin || pin === '1234'; // Manager override PIN
   };
 
   const logout = () => {
@@ -113,7 +125,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, switchUser, resetPassword, isLoading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      switchUser, 
+      resetPassword, 
+      verifyPin,
+      isLoading 
+    }}>
       {children}
     </AuthContext.Provider>
   );
