@@ -1,74 +1,102 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useStore } from "@/contexts/StoreContext";
-import { DollarSign, ShoppingCart, Package, AlertTriangle, TrendingUp } from "lucide-react";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from "recharts";
+import { useAuth } from "@/contexts/AuthContext";
+import { 
+  TrendingUp, 
+  DollarSign, 
+  ShoppingCart, 
+  Package, 
+  AlertTriangle,
+  BarChart3,
+  Users,
+  Calendar
+} from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 export default function Dashboard() {
-  const { stats, products } = useStore();
+  const { dashboardStats, products, sales } = useStore();
+  const { user } = useAuth();
 
-  const weeklyData = stats.weeklyRevenue.map((revenue, index) => ({
-    day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index],
-    revenue
-  }));
-
-  const lowStockProducts = products.filter(p => p.quantity <= p.lowStockThreshold);
+  // Create empty chart data for display
+  const weeklyData = [
+    { name: 'Mon', sales: 0 },
+    { name: 'Tue', sales: 0 },
+    { name: 'Wed', sales: 0 },
+    { name: 'Thu', sales: 0 },
+    { name: 'Fri', sales: 0 },
+    { name: 'Sat', sales: 0 },
+    { name: 'Sun', sales: 0 },
+  ];
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <div className="p-6 space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold mb-2">Command Dashboard</h1>
-        <p className="text-muted-foreground">Real-time operational overview</p>
+        <h1 className="text-3xl font-bold mb-2 text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Welcome back, {user?.name}! Here's your store overview.
+        </p>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="tactical-card">
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Sales</CardTitle>
-            <DollarSign className="h-4 w-4 text-tactical-secondary" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Today's Sales</CardTitle>
+            <DollarSign className="h-4 w-4 text-tactical-accent" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.todaySales.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-tactical-primary">
+              ${dashboardStats.todaySales.toFixed(2)}
+            </div>
             <p className="text-xs text-muted-foreground">
-              +12% from yesterday
+              <TrendingUp className="inline h-3 w-3 mr-1" />
+              Connect to see live data
             </p>
           </CardContent>
         </Card>
 
-        <Card className="tactical-card">
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-tactical-primary" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Transactions</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-tactical-accent" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.todayTransactions}</div>
+            <div className="text-2xl font-bold text-tactical-primary">
+              {dashboardStats.todayTransactions}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Active sales today
+              Sales processed today
             </p>
           </CardContent>
         </Card>
 
-        <Card className="tactical-card">
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Products</CardTitle>
             <Package className="h-4 w-4 text-tactical-accent" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts}</div>
+            <div className="text-2xl font-bold text-tactical-primary">
+              {products.length}
+            </div>
             <p className="text-xs text-muted-foreground">
-              In inventory
+              Items in inventory
             </p>
           </CardContent>
         </Card>
 
-        <Card className="tactical-card">
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock Alert</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-tactical-danger" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Low Stock</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.lowStockItems}</div>
+            <div className="text-2xl font-bold text-warning">
+              {dashboardStats.lowStockItems}
+            </div>
             <p className="text-xs text-muted-foreground">
               Items need restocking
             </p>
@@ -76,91 +104,143 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
-        <Card className="tactical-card">
+      {/* Charts Section */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Weekly Revenue
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <BarChart3 className="h-5 w-5 text-tactical-accent" />
+              Weekly Sales
             </CardTitle>
-            <CardDescription>Revenue trend for the past 7 days</CardDescription>
+            <CardDescription>Sales performance over the last 7 days</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={weeklyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value) => [`$${value}`, 'Revenue']}
-                  labelFormatter={(label) => `Day: ${label}`}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="hsl(var(--tactical-primary))" 
-                  strokeWidth={3}
-                  dot={{ fill: "hsl(var(--tactical-primary))", strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {dashboardStats.weeklyRevenue.every(val => val === 0) ? (
+              <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                <div className="text-center">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>No sales data available</p>
+                  <p className="text-xs">Connect your system to see charts</p>
+                </div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={weeklyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis dataKey="name" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))' 
+                    }} 
+                  />
+                  <Bar dataKey="sales" fill="hsl(var(--tactical-primary))" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
-        {/* Top Products */}
-        <Card className="tactical-card">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle>Top Selling Products</CardTitle>
-            <CardDescription>Best performers this week</CardDescription>
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <TrendingUp className="h-5 w-5 text-tactical-accent" />
+              Revenue Trend
+            </CardTitle>
+            <CardDescription>Revenue tracking over time</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stats.topProducts}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value, name) => [
-                    name === 'sales' ? `${value} units` : `$${value}`,
-                    name === 'sales' ? 'Units Sold' : 'Revenue'
-                  ]}
-                />
-                <Bar dataKey="sales" fill="hsl(var(--tactical-secondary))" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+              <div className="text-center">
+                <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>Revenue trend will appear here</p>
+                <p className="text-xs">Once you start making sales</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Low Stock Alert */}
-      {lowStockProducts.length > 0 && (
-        <Card className="tactical-card border-tactical-danger/50">
+      {/* Recent Activity & Top Products */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-tactical-danger">
-              <AlertTriangle className="h-5 w-5" />
-              Low Stock Alert
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <Calendar className="h-5 w-5 text-tactical-accent" />
+              Recent Sales
             </CardTitle>
-            <CardDescription>Items requiring immediate attention</CardDescription>
+            <CardDescription>Latest transactions</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {lowStockProducts.map((product) => (
-                <div key={product.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <div>
-                    <div className="font-medium">{product.name}</div>
-                    <div className="text-sm text-muted-foreground">SKU: {product.sku}</div>
+            {sales.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <ShoppingCart className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No recent sales</p>
+                <p className="text-xs">Sales will appear here</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {sales.slice(0, 5).map((sale) => (
+                  <div key={sale.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <div>
+                      <div className="font-medium text-sm text-foreground">#{sale.receiptNumber}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(sale.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium text-tactical-primary">
+                        ${sale.total.toFixed(2)}
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {sale.paymentMethod}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-tactical-danger">{product.quantity} left</div>
-                    <div className="text-sm text-muted-foreground">Min: {product.lowStockThreshold}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
-      )}
+
+        <Card className="border-border">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <Package className="h-5 w-5 text-tactical-accent" />
+              Top Products
+            </CardTitle>
+            <CardDescription>Best selling items</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {dashboardStats.topProducts.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No product data</p>
+                <p className="text-xs">Top products will appear here</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {dashboardStats.topProducts.map((product) => (
+                  <div key={product.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <div>
+                      <div className="font-medium text-sm text-foreground">{product.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {product.sales} sold
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium text-tactical-primary">
+                        ${product.revenue.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -9,7 +9,6 @@ import {
   Settings,
   Home,
   Receipt,
-  Shield
 } from "lucide-react";
 import {
   Sidebar,
@@ -20,9 +19,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { TacLogo } from "@/components/ui/logo";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navigationItems = [
@@ -45,8 +44,8 @@ export function AppSidebar() {
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive 
-      ? "bg-primary text-primary-foreground font-medium" 
-      : "hover:bg-muted/50 text-muted-foreground hover:text-foreground";
+      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+      : "hover:bg-sidebar-accent/50 text-sidebar-foreground hover:text-sidebar-accent-foreground";
 
   const filteredItems = navigationItems.filter(item => 
     user && item.roles.includes(user.role)
@@ -54,33 +53,39 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${isCollapsed ? "w-14" : "w-64"} border-r border-border bg-card`}
+      className={`${isCollapsed ? "w-14" : "w-64"} border-r border-sidebar-border bg-sidebar`}
       collapsible="offcanvas"
     >
       <SidebarContent>
-        <div className="p-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" />
+        <div className="p-4 border-b border-sidebar-border">
+          <div className="flex items-center gap-3">
+            <TacLogo size="md" className="text-tactical-gold flex-shrink-0" />
             {!isCollapsed && (
-              <span className="font-bold text-lg">TAC SHOP</span>
+              <div className="min-w-0">
+                <span className="font-bold text-lg text-sidebar-foreground block truncate">TAC SHOP</span>
+                <span className="text-xs text-sidebar-foreground/70 block truncate">Management System</span>
+              </div>
             )}
           </div>
         </div>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
+        <SidebarGroup className="px-2 py-4">
+          <SidebarGroupLabel className={`px-2 mb-2 text-sidebar-foreground/70 ${isCollapsed ? 'sr-only' : ''}`}>
+            Main Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="w-full">
                     <NavLink 
                       to={item.url} 
                       end={item.url === '/'}
                       className={getNavCls}
+                      title={isCollapsed ? item.title : undefined}
                     >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      {!isCollapsed && <span className="ml-3 truncate">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -90,10 +95,10 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {user && !isCollapsed && (
-          <div className="mt-auto p-4 border-t border-border">
-            <div className="text-sm text-muted-foreground">
-              <div className="font-medium">{user.name}</div>
-              <div className="capitalize">{user.role}</div>
+          <div className="mt-auto p-4 border-t border-sidebar-border">
+            <div className="text-sm text-sidebar-foreground/70">
+              <div className="font-medium text-sidebar-foreground truncate">{user.name}</div>
+              <div className="capitalize text-tactical-accent truncate">{user.role}</div>
             </div>
           </div>
         )}

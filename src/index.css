@@ -3,91 +3,105 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tactical Command Center Design System */
+/* TAC SHOP Design System - Updated with Custom Palette */
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --background: 45 100% 96%;
+    --foreground: 120 25% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card: 45 50% 98%;
+    --card-foreground: 120 25% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover: 45 50% 98%;
+    --popover-foreground: 120 25% 15%;
 
-    --primary: 210 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 120 60% 25%;
+    --primary-foreground: 45 100% 95%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 215 25% 25%;
+    --secondary: 45 85% 70%;
+    --secondary-foreground: 120 25% 15%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 45 40% 92%;
+    --muted-foreground: 120 16% 47%;
 
-    --accent: 39 100% 50%;
-    --accent-foreground: 215 25% 15%;
+    --accent: 45 85% 60%;
+    --accent-foreground: 120 25% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
+    --success: 120 60% 35%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 39 100% 50%;
-    --warning-foreground: 215 25% 15%;
+    --warning: 45 100% 50%;
+    --warning-foreground: 120 25% 15%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 210 100% 50%;
+    --border: 45 30% 88%;
+    --input: 45 30% 88%;
+    --ring: 120 60% 25%;
 
     --radius: 0.75rem;
 
-    --tactical-primary: 210 100% 50%; /* Blue */
-    --tactical-secondary: 142 76% 36%; /* Green */
-    --tactical-accent: 39 100% 50%; /* Amber */
-    --tactical-danger: 0 84% 60%; /* Red */
+    --tactical-primary: 120 60% 25%;
+    --tactical-secondary: 120 50% 35%;
+    --tactical-accent: 45 85% 60%;
+    --tactical-gold: 45 100% 50%;
+    --tactical-green-dark: 120 80% 15%;
   }
 
   .dark {
-    --background: 215 28% 8%;
-    --foreground: 210 40% 95%;
+    --background: 120 25% 8%;
+    --foreground: 45 40% 95%;
 
-    --card: 215 25% 12%;
-    --card-foreground: 210 40% 95%;
+    --card: 120 25% 12%;
+    --card-foreground: 45 40% 95%;
 
-    --popover: 215 25% 12%;
-    --popover-foreground: 210 40% 95%;
+    --popover: 120 25% 12%;
+    --popover-foreground: 45 40% 95%;
 
-    --primary: 210 100% 55%;
-    --primary-foreground: 215 28% 8%;
+    --primary: 120 60% 35%;
+    --primary-foreground: 120 25% 8%;
 
-    --secondary: 215 25% 18%;
-    --secondary-foreground: 210 40% 85%;
+    --secondary: 45 60% 45%;
+    --secondary-foreground: 120 25% 8%;
 
-    --muted: 215 25% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 120 25% 18%;
+    --muted-foreground: 120 20% 65%;
 
-    --accent: 39 100% 55%;
-    --accent-foreground: 215 28% 8%;
+    --accent: 45 85% 55%;
+    --accent-foreground: 120 25% 8%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 45%;
+    --success: 120 60% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 39 100% 55%;
-    --warning-foreground: 215 28% 8%;
+    --warning: 45 100% 55%;
+    --warning-foreground: 120 25% 8%;
 
-    --border: 215 25% 20%;
-    --input: 215 25% 20%;
-    --ring: 210 100% 55%;
+    --border: 120 25% 20%;
+    --input: 120 25% 20%;
+    --ring: 120 60% 35%;
 
-    --tactical-primary: 210 100% 55%;
-    --tactical-secondary: 142 76% 45%;
-    --tactical-accent: 39 100% 55%;
-    --tactical-danger: 0 84% 60%;
+    --tactical-primary: 120 60% 35%;
+    --tactical-secondary: 120 50% 45%;
+    --tactical-accent: 45 85% 55%;
+    --tactical-gold: 45 100% 55%;
+    --tactical-green-dark: 120 80% 25%;
+  }
+
+  /* Sidebar specific colors */
+  :root {
+    --sidebar-background: 120 25% 12%;
+    --sidebar-foreground: 45 40% 95%;
+    --sidebar-primary: 120 60% 35%;
+    --sidebar-primary-foreground: 120 25% 8%;
+    --sidebar-accent: 45 85% 55%;
+    --sidebar-accent-foreground: 120 25% 8%;
+    --sidebar-border: 120 25% 20%;
+    --sidebar-ring: 120 60% 35%;
   }
 }
 
@@ -128,5 +142,9 @@
   
   .status-warning {
     @apply text-warning;
+  }
+
+  .tac-logo {
+    @apply w-8 h-8 flex items-center justify-center bg-tactical-accent rounded border-2 border-tactical-primary;
   }
 }

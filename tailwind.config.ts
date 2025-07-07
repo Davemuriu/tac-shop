@@ -65,7 +65,8 @@ export default {
 					primary: 'hsl(var(--tactical-primary))',
 					secondary: 'hsl(var(--tactical-secondary))',
 					accent: 'hsl(var(--tactical-accent))',
-					danger: 'hsl(var(--tactical-danger))'
+					gold: 'hsl(var(--tactical-gold))',
+					'green-dark': 'hsl(var(--tactical-green-dark))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',

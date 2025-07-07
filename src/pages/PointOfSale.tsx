@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useStore } from "@/contexts/StoreContext";
-import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Smartphone } from "lucide-react";
+import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Smartphone, Package } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -60,7 +60,7 @@ export default function PointOfSale() {
         {/* Products Section */}
         <div className="lg:col-span-2 space-y-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Point of Sale</h1>
+            <h1 className="text-3xl font-bold mb-2 text-foreground">Point of Sale</h1>
             <p className="text-muted-foreground">Quick and efficient sales processing</p>
           </div>
 
@@ -90,45 +90,61 @@ export default function PointOfSale() {
           </div>
 
           {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto">
-            {filteredProducts.map((product) => (
-              <Card 
-                key={product.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => addToCart(product)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-sm leading-tight">{product.name}</h3>
-                    <Badge variant={product.quantity > product.lowStockThreshold ? "secondary" : "destructive"}>
-                      {product.quantity}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-2">{product.sku}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-tactical-primary">
-                      ${product.price.toFixed(2)}
-                    </span>
-                    <Button size="sm" variant="outline">
-                      <Plus className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="max-h-[600px] overflow-y-auto">
+            {products.length === 0 ? (
+              <div className="text-center py-12">
+                <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No Products Available</h3>
+                <p className="text-muted-foreground">Connect to your inventory system to load products.</p>
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <Search className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No Products Found</h3>
+                <p className="text-muted-foreground">Try adjusting your search terms or category filter.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {filteredProducts.map((product) => (
+                  <Card 
+                    key={product.id} 
+                    className="cursor-pointer hover:shadow-md transition-shadow border-border"
+                    onClick={() => addToCart(product)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold text-sm leading-tight text-foreground">{product.name}</h3>
+                        <Badge variant={product.quantity > product.lowStockThreshold ? "secondary" : "destructive"}>
+                          {product.quantity}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">{product.sku}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-bold text-tactical-primary">
+                          ${product.price.toFixed(2)}
+                        </span>
+                        <Button size="sm" variant="outline">
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Cart Section */}
         <div className="space-y-4">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          <Card className="h-full border-border">
+            <CardHeader className="border-b border-border">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <ShoppingCart className="h-5 w-5" />
                 Shopping Cart ({cart.length})
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4">
               {cart.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -140,7 +156,7 @@ export default function PointOfSale() {
                     {cart.map((item) => (
                       <div key={item.product.id} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm truncate">{item.product.name}</div>
+                          <div className="font-medium text-sm truncate text-foreground">{item.product.name}</div>
                           <div className="text-xs text-muted-foreground">
                             ${item.product.price.toFixed(2)} each
                           </div>
@@ -154,7 +170,7 @@ export default function PointOfSale() {
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="w-8 text-center text-sm">{item.quantity}</span>
+                          <span className="w-8 text-center text-sm text-foreground">{item.quantity}</span>
                           <Button
                             size="sm"
                             variant="outline"
@@ -180,12 +196,12 @@ export default function PointOfSale() {
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Subtotal:</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span className="text-muted-foreground">Subtotal:</span>
+                      <span className="text-foreground">${subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Tax (8%):</span>
-                      <span>${tax.toFixed(2)}</span>
+                      <span className="text-muted-foreground">Tax (8%):</span>
+                      <span className="text-foreground">${tax.toFixed(2)}</span>
                     </div>
                     {discount > 0 && (
                       <div className="flex justify-between text-sm text-tactical-secondary">
@@ -195,7 +211,7 @@ export default function PointOfSale() {
                     )}
                     <Separator />
                     <div className="flex justify-between font-bold text-lg">
-                      <span>Total:</span>
+                      <span className="text-foreground">Total:</span>
                       <span className="text-tactical-primary">${total.toFixed(2)}</span>
                     </div>
                   </div>
@@ -257,28 +273,28 @@ export default function PointOfSale() {
                         </div>
 
                         <div className="bg-muted p-4 rounded-lg space-y-2">
-                          <div className="flex justify-between">
-                            <span>Items:</span>
-                            <span>{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Items:</span>
+                            <span className="text-foreground">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span>Subtotal:</span>
-                            <span>${subtotal.toFixed(2)}</span>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Subtotal:</span>
+                            <span className="text-foreground">${subtotal.toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span>Tax:</span>
-                            <span>${tax.toFixed(2)}</span>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Tax:</span>
+                            <span className="text-foreground">${tax.toFixed(2)}</span>
                           </div>
                           {discount > 0 && (
-                            <div className="flex justify-between text-tactical-secondary">
+                            <div className="flex justify-between text-sm text-tactical-secondary">
                               <span>Discount:</span>
                               <span>-${discount.toFixed(2)}</span>
                             </div>
                           )}
                           <Separator />
                           <div className="flex justify-between font-bold text-lg">
-                            <span>Total:</span>
-                            <span>${total.toFixed(2)}</span>
+                            <span className="text-foreground">Total:</span>
+                            <span className="text-tactical-primary">${total.toFixed(2)}</span>
                           </div>
                         </div>
 
