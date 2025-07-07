@@ -11,7 +11,7 @@ interface StoreContextType {
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
-  completeSale: (paymentMethod: 'cash' | 'card' | 'digital', discount?: number) => Sale;
+  completeSale: (paymentMethod: 'cash' | 'card' | 'digital' | 'mpesa', discount?: number) => Sale;
   clearCart: () => void;
 }
 
@@ -47,7 +47,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             : item
         );
       }
-      return [...prevCart, { product, quantity: 1 }];
+      return [...prevCart, { product, quantity: 1, discount: 0 }];
     });
   };
 
@@ -70,13 +70,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const completeSale = (paymentMethod: 'cash' | 'card' | 'digital', discount: number = 0): Sale => {
+  const completeSale = (paymentMethod: 'cash' | 'card' | 'digital' | 'mpesa', discount: number = 0): Sale => {
     const saleItems: SaleItem[] = cart.map(item => ({
       id: `item-${Date.now()}-${Math.random()}`,
       productId: item.product.id,
       productName: item.product.name,
       quantity: item.quantity,
       unitPrice: item.product.price,
+      discount: item.discount || 0,
       total: item.product.price * item.quantity
     }));
 

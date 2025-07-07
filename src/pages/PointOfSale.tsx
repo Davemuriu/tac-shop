@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/contexts/StoreContext";
-import { ShoppingCart, Trash2, Plus, Minus, Package, Hold, Receipt, Calculator } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, Package, Pause, Receipt, Calculator } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
@@ -184,7 +183,7 @@ export default function PointOfSale() {
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={handleHoldCart}>
-                    <Hold className="h-4 w-4" />
+                    <Pause className="h-4 w-4" />
                   </Button>
                 </div>
               </CardTitle>
