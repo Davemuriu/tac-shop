@@ -2,35 +2,36 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/contexts/StoreContext";
-import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Smartphone, Package } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, Package, Hold, Receipt, Calculator } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { ProductSearch } from "@/components/POS/ProductSearch";
+import { PaymentMethods } from "@/components/POS/PaymentMethods";
 
 export default function PointOfSale() {
   const { products, cart, addToCart, removeFromCart, updateCartQuantity, completeSale } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'digital'>("cash");
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'digital' | 'mpesa'>("cash");
   const [discount, setDiscount] = useState(0);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [requiresPinOverride, setRequiresPinOverride] = useState(false);
+  const [overridePin, setOverridePin] = useState("");
 
   const categories = ["all", ...new Set(products.map(p => p.category))];
   
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (product.barcode && product.barcode.includes(searchQuery));
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory && product.active;
+    return matchesCategory && product.active;
   });
 
-  const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const subtotal = cart.reduce((sum, item) => sum + ((item.priceOverride || item.product.price) * item.quantity) - item.discount, 0);
   const tax = subtotal * 0.08; // 8% tax
   const total = subtotal + tax - discount;
 
@@ -54,8 +55,38 @@ export default function PointOfSale() {
     });
   };
 
-  const handlePaymentMethodChange = (value: string) => {
-    setPaymentMethod(value as 'cash' | 'card' | 'digital');
+  const handlePaymentMethodChange = (method: 'cash' | 'card' | 'digital' | 'mpesa') => {
+    setPaymentMethod(method);
+  };
+
+  const handleDiscountChange = (value: number) => {
+    if (value > 0 && !requiresPinOverride) {
+      setRequiresPinOverride(true);
+      return;
+    }
+    setDiscount(value);
+  };
+
+  const validatePinOverride = () => {
+    if (overridePin === "1234") { // Manager PIN
+      setRequiresPinOverride(false);
+      setOverridePin("");
+      return true;
+    }
+    toast({
+      title: "Invalid PIN",
+      description: "Manager PIN required for discounts",
+      variant: "destructive"
+    });
+    return false;
+  };
+
+  const handleHoldCart = () => {
+    // Implementation for holding cart
+    toast({
+      title: "Cart Held",
+      description: "Cart has been saved for later",
+    });
   };
 
   return (
@@ -68,84 +99,94 @@ export default function PointOfSale() {
             <p className="text-muted-foreground">Quick and efficient sales processing</p>
           </div>
 
-          {/* Search and Filters */}
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search products, SKU, or barcode..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category === "all" ? "All Categories" : category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Search */}
+          <ProductSearch
+            products={products}
+            onAddToCart={addToCart}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
 
-          {/* Products Grid */}
-          <div className="max-h-[600px] overflow-y-auto">
-            {products.length === 0 ? (
-              <div className="text-center py-12">
-                <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No Products Available</h3>
-                <p className="text-muted-foreground">Connect to your inventory system to load products.</p>
+          {/* Category Tabs */}
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="all">All</TabsTrigger>
+              {categories.slice(1, 4).map(category => (
+                <TabsTrigger key={category} value={category}>
+                  {category}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <TabsContent value={selectedCategory} className="mt-4">
+              <div className="max-h-[500px] overflow-y-auto">
+                {products.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">No Products Available</h3>
+                    <p className="text-muted-foreground">Connect to your inventory system to load products.</p>
+                  </div>
+                ) : filteredProducts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">No Products Found</h3>
+                    <p className="text-muted-foreground">Try selecting a different category.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {filteredProducts.map((product) => (
+                      <Card 
+                        key={product.id} 
+                        className="cursor-pointer hover:shadow-md transition-shadow border-border"
+                        onClick={() => addToCart(product)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-semibold text-sm leading-tight text-foreground">{product.name}</h3>
+                            <div className="flex gap-1">
+                              <Badge variant={product.quantity > product.lowStockThreshold ? "secondary" : "destructive"}>
+                                {product.quantity}
+                              </Badge>
+                              {product.quantity <= product.lowStockThreshold && (
+                                <Badge variant="destructive" className="text-xs">
+                                  Low
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-2">SKU: {product.sku}</p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-lg font-bold text-tactical-primary">
+                              ${product.price.toFixed(2)}
+                            </span>
+                            <Button size="sm" variant="outline">
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
-            ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-12">
-                <Search className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No Products Found</h3>
-                <p className="text-muted-foreground">Try adjusting your search terms or category filter.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filteredProducts.map((product) => (
-                  <Card 
-                    key={product.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow border-border"
-                    onClick={() => addToCart(product)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-sm leading-tight text-foreground">{product.name}</h3>
-                        <Badge variant={product.quantity > product.lowStockThreshold ? "secondary" : "destructive"}>
-                          {product.quantity}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground mb-2">{product.sku}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-tactical-primary">
-                          ${product.price.toFixed(2)}
-                        </span>
-                        <Button size="sm" variant="outline">
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Cart Section */}
         <div className="space-y-4">
           <Card className="h-full border-border">
-            <CardHeader className="border-b border-border">
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <ShoppingCart className="h-5 w-5" />
-                Shopping Cart ({cart.length})
+            <CardHeader className="border-b border-border pb-4">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  Cart ({cart.length})
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={handleHoldCart}>
+                    <Hold className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-4">
@@ -162,7 +203,12 @@ export default function PointOfSale() {
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm truncate text-foreground">{item.product.name}</div>
                           <div className="text-xs text-muted-foreground">
-                            ${item.product.price.toFixed(2)} each
+                            ${(item.priceOverride || item.product.price).toFixed(2)} each
+                            {item.discount > 0 && (
+                              <span className="text-tactical-secondary ml-1">
+                                (-${item.discount.toFixed(2)})
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-1">
@@ -223,10 +269,11 @@ export default function PointOfSale() {
                   <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
                     <DialogTrigger asChild>
                       <Button className="w-full" size="lg">
-                        Proceed to Checkout
+                        <Receipt className="h-4 w-4 mr-2" />
+                        Checkout
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-md">
                       <DialogHeader>
                         <DialogTitle>Complete Sale</DialogTitle>
                         <DialogDescription>
@@ -235,46 +282,52 @@ export default function PointOfSale() {
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
-                          <Label htmlFor="payment-method">Payment Method</Label>
-                          <Select value={paymentMethod} onValueChange={handlePaymentMethodChange}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="cash">
-                                <div className="flex items-center gap-2">
-                                  <Banknote className="h-4 w-4" />
-                                  Cash
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="card">
-                                <div className="flex items-center gap-2">
-                                  <CreditCard className="h-4 w-4" />
-                                  Card
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="digital">
-                                <div className="flex items-center gap-2">
-                                  <Smartphone className="h-4 w-4" />
-                                  Digital
-                                </div>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Label>Payment Method</Label>
+                          <PaymentMethods 
+                            onPaymentSelect={handlePaymentMethodChange}
+                            selectedMethod={paymentMethod}
+                          />
                         </div>
                         
                         <div>
                           <Label htmlFor="discount">Discount ($)</Label>
-                          <Input
-                            id="discount"
-                            type="number"
-                            value={discount}
-                            onChange={(e) => setDiscount(Number(e.target.value) || 0)}
-                            min="0"
-                            max={subtotal}
-                            step="0.01"
-                          />
+                          <div className="flex gap-2">
+                            <Input
+                              id="discount"
+                              type="number"
+                              value={discount}
+                              onChange={(e) => handleDiscountChange(Number(e.target.value) || 0)}
+                              min="0"
+                              max={subtotal}
+                              step="0.01"
+                              disabled={requiresPinOverride}
+                            />
+                            {requiresPinOverride && (
+                              <Button size="sm" variant="outline">
+                                <Calculator className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
+
+                        {requiresPinOverride && (
+                          <div>
+                            <Label htmlFor="pin">Manager PIN Required</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                id="pin"
+                                type="password"
+                                value={overridePin}
+                                onChange={(e) => setOverridePin(e.target.value)}
+                                placeholder="Enter PIN"
+                                maxLength={4}
+                              />
+                              <Button onClick={validatePinOverride} size="sm">
+                                Verify
+                              </Button>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="bg-muted p-4 rounded-lg space-y-2">
                           <div className="flex justify-between text-sm">
@@ -302,8 +355,13 @@ export default function PointOfSale() {
                           </div>
                         </div>
 
-                        <Button onClick={handleCheckout} className="w-full" size="lg">
-                          Complete Sale
+                        <Button 
+                          onClick={handleCheckout} 
+                          className="w-full" 
+                          size="lg"
+                          disabled={requiresPinOverride}
+                        >
+                          Complete Sale - ${total.toFixed(2)}
                         </Button>
                       </div>
                     </DialogContent>

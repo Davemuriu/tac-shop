@@ -6,6 +6,7 @@ export interface User {
   role: 'admin' | 'manager' | 'cashier';
   avatar?: string;
   permissions: string[];
+  pin?: string;
 }
 
 export interface Product {
@@ -21,8 +22,18 @@ export interface Product {
   image?: string;
   active: boolean;
   lowStockThreshold: number;
+  reorderLevel: number;
+  variants?: ProductVariant[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  name: string;
+  value: string;
+  priceModifier: number;
+  quantityModifier: number;
 }
 
 export interface Sale {
@@ -33,10 +44,10 @@ export interface Sale {
   tax: number;
   discount: number;
   total: number;
-  paymentMethod: 'cash' | 'card' | 'digital';
+  paymentMethod: 'cash' | 'card' | 'digital' | 'mpesa';
   cashierId: string;
   customerId?: string;
-  status: 'completed' | 'pending' | 'refunded';
+  status: 'completed' | 'pending' | 'refunded' | 'held';
   createdAt: string;
   notes?: string;
 }
@@ -47,7 +58,9 @@ export interface SaleItem {
   productName: string;
   quantity: number;
   unitPrice: number;
+  discount: number;
   total: number;
+  variantId?: string;
 }
 
 export interface Customer {
@@ -76,6 +89,9 @@ export interface DashboardStats {
 export interface CartItem {
   product: Product;
   quantity: number;
+  discount: number;
+  priceOverride?: number;
+  variantId?: string;
 }
 
 export interface Receipt {
@@ -85,6 +101,7 @@ export interface Receipt {
   items: SaleItem[];
   subtotal: number;
   tax: number;
+  discount: number;
   total: number;
   paymentMethod: string;
   cashier: string;
@@ -94,5 +111,25 @@ export interface Receipt {
     address: string;
     phone: string;
     email: string;
+    logo?: string;
   };
+}
+
+export interface HeldCart {
+  id: string;
+  items: CartItem[];
+  customerId?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface SystemSettings {
+  shopName: string;
+  logo?: string;
+  address: string;
+  phone: string;
+  email: string;
+  taxRate: number;
+  currency: string;
+  receiptFooter?: string;
 }

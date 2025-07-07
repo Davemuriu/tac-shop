@@ -6,6 +6,8 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  switchUser: (userId: string, pin: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -26,21 +28,24 @@ const mockUsers: User[] = [
     email: 'admin@tacshop.com',
     name: 'Admin User',
     role: 'admin',
-    permissions: ['all']
+    permissions: ['all'],
+    pin: '1234'
   },
   {
     id: '2',
     email: 'manager@tacshop.com',
     name: 'Manager User',
     role: 'manager',
-    permissions: ['inventory', 'reports', 'pos']
+    permissions: ['inventory', 'reports', 'pos'],
+    pin: '5678'
   },
   {
     id: '3',
     email: 'cashier@tacshop.com',
     name: 'Cashier User',
     role: 'cashier',
-    permissions: ['pos']
+    permissions: ['pos'],
+    pin: '9999'
   }
 ];
 
@@ -75,13 +80,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   };
 
+  const switchUser = async (userId: string, pin: string): Promise<boolean> => {
+    setIsLoading(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const foundUser = mockUsers.find(u => u.id === userId && u.pin === pin);
+    if (foundUser) {
+      setUser(foundUser);
+      localStorage.setItem('tacshop_user', JSON.stringify(foundUser));
+      setIsLoading(false);
+      return true;
+    }
+    
+    setIsLoading(false);
+    return false;
+  };
+
+  const resetPassword = async (email: string): Promise<boolean> => {
+    setIsLoading(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const foundUser = mockUsers.find(u => u.email === email);
+    setIsLoading(false);
+    return !!foundUser;
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('tacshop_user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, switchUser, resetPassword, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
