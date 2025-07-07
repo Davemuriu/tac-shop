@@ -54,6 +54,10 @@ export default function PointOfSale() {
     });
   };
 
+  const handlePaymentMethodChange = (value: string) => {
+    setPaymentMethod(value as 'cash' | 'card' | 'digital');
+  };
+
   return (
     <div className="p-6 h-full">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
@@ -232,7 +236,7 @@ export default function PointOfSale() {
                       <div className="space-y-4">
                         <div>
                           <Label htmlFor="payment-method">Payment Method</Label>
-                          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                          <Select value={paymentMethod} onValueChange={handlePaymentMethodChange}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
