@@ -1,15 +1,14 @@
 
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
-  const { user } = useAuth();
-  
+  const user = { role: 'admin' }; // Mock user object
+
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  return <Navigate to="/" replace />;
+  return <Navigate to="/dashboard" replace />;
 };
 
 export default Index;

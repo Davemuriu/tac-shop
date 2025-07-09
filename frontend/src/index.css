@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -92,7 +91,7 @@
     --tucktical-green-dark: 120 80% 25%;
   }
 
-  /* Sidebar specific colors */
+  /* Sidebar specific */
   :root {
     --sidebar-background: 120 25% 12%;
     --sidebar-foreground: 45 40% 95%;
@@ -103,19 +102,41 @@
     --sidebar-border: 120 25% 20%;
     --sidebar-ring: 120 60% 35%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
-  }
+  background-image: url('/bg-pattern.jpg');
+  background-repeat: repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: auto;
+}
 
   html {
     @apply dark;
+  }
+  html, body, #root {
+  height: 100%;
+  background-color: transparent;
+}
+  /* Optional overlay to soften pattern */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  html:not(.dark) body::before {
+    background-color: rgba(255, 255, 255, 0.7);
+  }
+
+  html.dark body::before {
+    background-color: rgba(18, 24, 20, 0.6);
   }
 }
 
@@ -123,28 +144,49 @@
   .tucktical-grid {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
   }
-  
+
   .tucktical-card {
     @apply bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow;
   }
-  
+
   .tucktical-button {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium transition-colors;
   }
-  
+
   .status-online {
     @apply text-success;
   }
-  
+
   .status-offline {
     @apply text-destructive;
   }
-  
+
   .status-warning {
     @apply text-warning;
   }
 
   .tuck-logo {
     @apply w-8 h-8 flex items-center justify-center bg-tucktical-accent rounded border-2 border-tucktical-primary;
+  }
+}
+@layer utilities {
+  .tucktical-bg {
+    @apply bg-tucktical-primary text-tucktical-secondary;
+  }
+
+  .tucktical-border {
+    @apply border-tucktical-secondary;
+  }
+
+  .tucktical-text {
+    @apply text-tucktical-accent;
+  }
+
+  .tucktical-shadow {
+    @apply shadow-lg;
+  }
+
+  .tucktical-radius {
+    @apply rounded-lg;
   }
 }

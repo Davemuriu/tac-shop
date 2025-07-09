@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useStore } from "@/contexts/StoreContext";
-import { useAuth } from "@/contexts/AuthContext";
 import { 
   TrendingUp, 
   DollarSign, 
@@ -16,7 +15,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function Dashboard() {
   const { dashboardStats, products, sales } = useStore();
-  const { user } = useAuth();
 
   const weeklyData = dashboardStats.weeklyRevenue.map((val, idx) => ({
     name: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][idx],
@@ -28,7 +26,7 @@ export default function Dashboard() {
       <div>
         <h1 className="text-3xl font-bold mb-2 text-foreground">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back, {user?.name}! Here's your store overview.
+          Welcome back! Here's your store overview.
         </p>
       </div>
 

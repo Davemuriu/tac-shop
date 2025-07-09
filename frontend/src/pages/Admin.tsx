@@ -8,12 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/contexts/AuthContext";
 import { Settings, Users, Plus, Edit, Trash2, Upload } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 export default function Admin() {
-  const { user } = useAuth();
+  const user = { role: 'admin' };
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
   const [users] = useState([

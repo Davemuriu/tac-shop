@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { StoreProvider } from "@/contexts/StoreContext";
 import { AppSidebar } from "@/components/Layout/AppSidebar";
 import { Header } from "@/components/Layout/Header";
@@ -14,119 +13,45 @@ import Inventory from "./pages/Inventory";
 import Reports from "./pages/Reports";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Login from './pages/Login';
 
 const queryClient = new QueryClient();
 
 function AppLayout() {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 overflow-auto">
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/pos"
-                element={
-                  <ProtectedRoute>
-                    <PointOfSale />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory"
-                element={
-                  <ProtectedRoute roles={["admin"]}>
-                    <Inventory />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/reports"
-                element={
-                  <ProtectedRoute roles={["admin", "manager"]}>
-                    <Reports />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute roles={["admin"]}>
-                    <Admin />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/sales"
-                element={
-                  <ProtectedRoute>
-                    <div className="p-6">
-                      <h1 className="text-2xl font-bold">Sales History</h1>
-                      <p className="text-muted-foreground">Coming soon...</p>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/customers"
-                element={
-                  <ProtectedRoute>
-                    <div className="p-6">
-                      <h1 className="text-2xl font-bold">Customer Management</h1>
-                      <p className="text-muted-foreground">Coming soon...</p>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={<Navigate to="/admin" replace />}
-              />
-              <Route
-                path="/unauthorized"
-                element={
-                  <div className="p-6 text-red-600 font-semibold">
-                    Access Denied
+      {/* Apply the background image here */}
+      <div className="min-h-screen w-full bg-[url('/bg-pattern.jpg')] bg-repeat bg-center bg-fixed">
+        <div className="min-h-screen flex w-full bg-background/90 backdrop-blur-sm">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col">
+            <Header />
+            <main className="flex-1 overflow-auto">
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/pos" element={<PointOfSale />} />
+                <Route path="/inventory" element={<Inventory />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/sales" element={
+                  <div className="p-6">
+                    <h1 className="text-2xl font-bold">Sales History</h1>
+                    <p className="text-muted-foreground">Coming soon...</p>
                   </div>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
+                } />
+                <Route path="/customers" element={
+                  <div className="p-6">
+                    <h1 className="text-2xl font-bold">Customer Management</h1>
+                    <p className="text-muted-foreground">Coming soon...</p>
+                  </div>
+                } />
+                <Route path="/settings" element={<Navigate to="/admin" replace />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+          </div>
         </div>
       </div>
     </SidebarProvider>
-  );
-}
-
-function AppContent() {
-  const { isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/*" element={<AppLayout />} />
-    </Routes>
   );
 }
 
@@ -136,11 +61,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <StoreProvider>
-            <AppContent />
-          </StoreProvider>
-        </AuthProvider>
+        <StoreProvider>
+          <AppLayout />
+        </StoreProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

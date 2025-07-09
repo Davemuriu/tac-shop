@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Product, Sale, SaleItem, CartItem, DashboardStats } from '@/types';
-import { useAuth } from './AuthContext';
 
 interface StoreContextType {
   products: Product[];
@@ -22,31 +21,29 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-  
-  // Empty initial states - no mock data
   const [products] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [heldCarts, setHeldCarts] = useState<{ id: string; items: CartItem[]; timestamp: string }[]>([]);
+  const [heldCarts, setHeldCarts] = useState<
+    { id: string; items: CartItem[]; timestamp: string }[]
+  >([]);
 
-  // Empty dashboard stats
   const [dashboardStats] = useState<DashboardStats>({
     todaySales: 0,
     todayTransactions: 0,
     lowStockItems: 0,
     totalProducts: 0,
     weeklyRevenue: [0, 0, 0, 0, 0, 0, 0],
-    topProducts: []
+    topProducts: [],
   });
 
   const addToCart = (product: Product) => {
     if (product.quantity <= 0) return;
-    
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.product.id === product.id);
+
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.product.id === product.id);
       if (existingItem) {
-        return prevCart.map(item =>
+        return prevCart.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
@@ -57,7 +54,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFromCart = (productId: string) => {
-    setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
+    setCart((prevCart) => prevCart.filter((item) => item.product.id !== productId));
   };
 
   const updateCartQuantity = (productId: string, quantity: number) => {
@@ -65,61 +62,60 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       removeFromCart(productId);
       return;
     }
-    
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.product.id === productId
-          ? { ...item, quantity }
-          : item
+
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.product.id === productId ? { ...item, quantity } : item
       )
     );
   };
 
   const holdCart = () => {
     if (cart.length === 0) return;
-    
+
     const heldCart = {
       id: `held-${Date.now()}`,
       items: [...cart],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
-    setHeldCarts(prev => [...prev, heldCart]);
+
+    setHeldCarts((prev) => [...prev, heldCart]);
     setCart([]);
   };
 
   const resumeCart = (heldCartId: string) => {
-    const heldCart = heldCarts.find(hc => hc.id === heldCartId);
+    const heldCart = heldCarts.find((hc) => hc.id === heldCartId);
     if (heldCart) {
       setCart(heldCart.items);
-      setHeldCarts(prev => prev.filter(hc => hc.id !== heldCartId));
+      setHeldCarts((prev) => prev.filter((hc) => hc.id !== heldCartId));
     }
   };
 
   const addProduct = (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
-    // Mock implementation - in real app this would call API
     console.log('Adding product:', product);
   };
 
   const updateProduct = (id: string, updates: Partial<Product>) => {
-    // Mock implementation - in real app this would call API
     console.log('Updating product:', id, updates);
   };
 
-  const completeSale = (paymentMethod: 'cash' | 'card' | 'digital' | 'mpesa', discount: number = 0): Sale => {
-    const saleItems: SaleItem[] = cart.map(item => ({
+  const completeSale = (
+    paymentMethod: 'cash' | 'card' | 'digital' | 'mpesa',
+    discount: number = 0
+  ): Sale => {
+    const saleItems: SaleItem[] = cart.map((item) => ({
       id: `item-${Date.now()}-${Math.random()}`,
       productId: item.product.id,
       productName: item.product.name,
       quantity: item.quantity,
       unitPrice: item.product.price,
       discount: item.discount || 0,
-      total: item.product.price * item.quantity
+      total: item.product.price * item.quantity,
     }));
 
     const subtotal = saleItems.reduce((sum, item) => sum + item.total, 0);
-    const tax = subtotal * 0.08;
-    const total = subtotal + tax - discount;
+    const tax = 0; // No tax for the event
+    const total = subtotal - discount;
 
     const sale: Sale = {
       id: `sale-${Date.now()}`,
@@ -130,12 +126,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       discount,
       total,
       paymentMethod,
-      cashierId: user?.id || 'unknown',
-      status: 'completed',
+      cashierId: "default-user",
+      status: "completed",
       createdAt: new Date().toISOString(),
     };
 
-    setSales(prevSales => [sale, ...prevSales]);
+    setSales((prevSales) => [sale, ...prevSales]);
     setCart([]);
 
     return sale;
@@ -146,22 +142,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <StoreContext.Provider value={{
-      products,
-      sales,
-      cart,
-      dashboardStats,
-      addToCart,
-      removeFromCart,
-      updateCartQuantity,
-      completeSale,
-      clearCart,
-      holdCart,
-      resumeCart,
-      heldCarts,
-      addProduct,
-      updateProduct,
-    }}>
+    <StoreContext.Provider
+      value={{
+        products,
+        sales,
+        cart,
+        dashboardStats,
+        addToCart,
+        removeFromCart,
+        updateCartQuantity,
+        completeSale,
+        clearCart,
+        holdCart,
+        resumeCart,
+        heldCarts,
+        addProduct,
+        updateProduct,
+      }}
+    >
       {children}
     </StoreContext.Provider>
   );
@@ -170,7 +168,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 export function useStore() {
   const context = useContext(StoreContext);
   if (context === undefined) {
-    throw new Error('useStore must be used within a StoreProvider');
+    throw new Error("useStore must be used within a StoreProvider");
   }
   return context;
 }
